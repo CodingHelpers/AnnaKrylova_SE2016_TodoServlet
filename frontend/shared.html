@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+    <head>
+        <title>Shared Tasks</title>
+        <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script>
+            function loadMore() {
+                var offset = $("#load_more_button").data("offset");
+                console.log(offset); 
+                $.get("http://localhost:8080/todo/shared?cnt=20&offset="+offset, function(responseJson) {
+                    $.each(responseJson, function(index, task) {    
+                        $("<tr>").appendTo($("#tasks"))                  
+                            .append($("<td>").text(task.name))      
+                            .append($("<td>").text(task.description))
+                            .append($("<td>").text(task.done)) 
+                    });
+                    $("#load_more_button").data("offset", offset + responseJson.length);
+                });
+            };
+        
+            $(document).ready(function() {
+                $("#load_more_button").data("offset", 0);
+                loadMore();
+            });
+        </script>
+        
+        <style type="text/css">
+        table {
+           border-spacing: 5px;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+        }
+        </style>
+    </head>
+    <body>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Done?</th>
+                </tr>
+            </thead>
+            <tbody id="tasks">
+                
+            </tbody>
+        </table>
+        <button id="load_more_button" onclick="loadMore()">Load More</button>
+    </body>
+</html>

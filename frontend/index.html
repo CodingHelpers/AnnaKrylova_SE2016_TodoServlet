@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+    <head>
+        <title>Todo List</title>
+        <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script>
+            function loadMore() {
+                var offset = $("#load_more_button").data("offset");
+                console.log(offset); 
+                $.ajax({
+                    url: "http://localhost:8080/todo/?cnt=10&offset="+offset,
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                }).done(function(responseJson) {
+                    $.each(responseJson, function(index, task) {    
+                        $("<tr>").appendTo($("#tasks"))                  
+                            .append($("<td>").text(task.name))      
+                            .append($("<td>").text(task.description))
+                            .append($("<td><button onclick=\"toggleDone('"+escape(JSON.stringify(task))+"')\">"+task.done+"</button>"))
+                            .append($("<td><button onclick=\"toggleShared('"+escape(JSON.stringify(task))+"')\">"+task.shared+"</button>"))
+                            .append($("<td><button onclick=\"deleteTask('"+task.id+"')\">Delete</button>"));    
+                    });
+                    $("#load_more_button").data("offset", offset + responseJson.length);
+                });
+            };
+
+            function addNewTask() {
+                console.log("Lol");
+                var name = $("#task_name").val();
+                var desc = $("#task_desc").val();
+                // Checking for blank fields.
+                if(  name=='' || desc ==''){
+                    $('input[type="text"]').css("border","2px solid red");
+                    $('input[type="text"]').css("box-shadow","0 0 3px red");
+                    alert("Please fill all fields!");
+                } else {
+                    $.ajax({
+                        url: "http://localhost:8080/todo/", 
+                        data: JSON.stringify({ name: name, description: desc, done: false, shared: false }),
+                        method: 'PUT',
+                        xhrFields: {
+                            withCredentials: true
+                        }
+                    }).done(function(data) {
+                        location.reload();
+                    });
+                }
+            };
+
+            function deleteTask(id) {
+                $.ajax({
+                    url: "http://localhost:8080/todo/task/"+id, 
+                    method: 'DELETE',
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                }).done(function(data) {
+                    location.reload();
+                });
+            }
+
+            function toggleDone(task) {
+                task = unescape(task);
+                task = JSON.parse(task);
+                task.done = !task.done;
+                $.ajax({
+                    url: "http://localhost:8080/todo/task/",
+                    data: JSON.stringify(task), 
+                    method: 'POST',
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                }).done(function(data) {
+                    location.reload();
+                });
+            }
+
+            function toggleShared(task) {
+                task = unescape(task);
+                task = JSON.parse(task);
+                task.shared = !task.shared;
+                $.ajax({
+                    url: "http://localhost:8080/todo/task/", 
+                    method: 'POST',
+                    data: JSON.stringify(task),
+                    xhrFields: {
+                        withCredentials: true
+                    }
+                }).done(function(data) {
+                    location.reload();
+                });
+            }
+        
+            $(document).ready(function() {
+                $("#load_more_button").data("offset", 0);
+                loadMore();
+            });
+        </script>
+        
+        <style type="text/css">
+        table {
+           border-spacing: 5px;
+        }
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+        }
+        </style>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>
+                    <div class="container">
+                        <div class="main">
+                            <form class="form" method="post" action="#">
+                                <label>Name :</label>
+                                <input type="text" name="task_name" id="task_name">
+                                <label>Description :</label>
+                                <input type="text" name="task_desc" id="task_desc">
+                                <input type="button" name="add_task_button" id="add_task_button" onclick="addNewTask()", value="Add Task">
+                            </form>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Done?</th>
+                                <th>Shared?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasks">
+                            
+                        </tbody>
+                    </table>
+                    <button id="load_more_button" onclick="loadMore()">Load More</button>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table>
+                        <tr>
+                            <td>
+                                <a href="login.html">Login</a>
+                            </td>
+                            <td>
+                                <a href="shared.html">See shared tasks</a>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr> 
+        </table>
+    </body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html lang="en">
+    <head>
+        <title>Authorization</title>
+        <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                $("#login_button").click(function(){
+                    var login = $("#login").val();
+                    var password = $("#password").val();
+                    // Checking for blank fields.
+                    if( login =='' || password ==''){
+                        $('input[type="text"],input[type="password"]').css("border","2px solid red");
+                        $('input[type="text"],input[type="password"]').css("box-shadow","0 0 3px red");
+                        alert("Please fill all fields!");
+                    } else {
+                        $.ajax({
+                            url: "http://localhost:8080/todo/auth/signin", 
+                            data: JSON.stringify({ login: login, password: password}),
+                            method: 'POST',
+                            xhrFields: {
+                                withCredentials: true
+                            }
+                        }).done(function(data) {
+                            if(data=='Wrong login or password') {
+                                $('input[type="text"]').css({"border":"2px solid red","box-shadow":"0 0 3px red"});
+                                $('input[type="password"]').css({"border":"2px solid #00F5FF","box-shadow":"0 0 5px #00F5FF"});
+                                alert(data);
+                            } else {
+                                alert("Success!");
+                            }
+                        });
+                    }
+                });
+                $("#signup_button").click(function(){
+                    var login = $("#login").val();
+                    var password = $("#password").val();
+                    // Checking for blank fields.
+                    if(  login=='' || password ==''){
+                        $('input[type="text"],input[type="password"]').css("border","2px solid red");
+                        $('input[type="text"],input[type="password"]').css("box-shadow","0 0 3px red");
+                        alert("Please fill all fields!");
+                    } else {
+                        $.post("http://localhost:8080/todo/auth/signup", JSON.stringify({ login: login, password: password}),
+                        function(data) {
+                            if(data!='') {
+                                $('input[type="text"]').css({"border":"2px solid red","box-shadow":"0 0 3px red"});
+                                $('input[type="password"]').css({"border":"2px solid #00F5FF","box-shadow":"0 0 5px #00F5FF"});
+                                alert(data);
+                            } else {
+                                alert("Success!");
+                            }
+                        });
+                    }
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="main">
+                <form class="form" method="post" action="#">
+                    <label>Login :</label>
+                    <input type="text" name="login" id="login">
+                    <label>Password :</label>
+                    <input type="password" name="password" id="password">
+                    <input type="button" name="login" id="login_button" value="Login">
+                    <input type="button" name="signup" id="signup_button" value="Signup">
+                </form>
+            </div>
+        </div>
+    </body>
+</html>
